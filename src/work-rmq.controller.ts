@@ -7,7 +7,12 @@ export class WorkRmqController {
   constructor(private readonly workService: WorkService) {}
 
   @EventPattern('inbound.task.assignment')
-  handleInboundTask(@Payload() payload: any) {
-    this.workService.handleTask(payload);
+  async handleInboundTask(@Payload() payload: any) {
+    await this.workService.handleTask(payload);
+  }
+
+  @EventPattern('inbound.task.assignment.completed')
+  handleCompletedTask(@Payload() payload: any) {
+    console.log('Completed task event received by downstream consumer:', payload);
   }
 }

@@ -5,7 +5,7 @@ import { ClientProxy } from '@nestjs/microservices';
 export class WorkController {
   constructor(
     @Inject('TASK_BROKER')
-    private readonly client: ClientProxy,
+    private readonly client: ClientProxy,       // Injects a PRODUCER CLIENT that was registered in workmodule using clientmodule.register
   ) {}
 
   @Post('assign')
@@ -16,7 +16,7 @@ export class WorkController {
       routed_at: new Date().toISOString(),
     };
 
-    await this.client.emit('inbound.task.assignment', message).toPromise();
+    await this.client.emit('inbound.task.assignment', message).toPromise(); // Publish an event message with the routing key/pattern into RabbitMQ
 
     return {
       success: true,

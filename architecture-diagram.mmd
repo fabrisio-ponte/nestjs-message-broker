@@ -1,0 +1,32 @@
+flowchart TD
+    A[HTTP Client] --> B[POST /work/assign\nWorkController.createTask]
+    B --> C[ClientProxy.emit('inbound.task.assignment', message)]
+    C --> D[RabbitMQ Queue\n task-routing.inbound ]
+    D --> E[WorkRmqController\n@EventPattern('inbound.task.assignment')]
+    E --> F[WorkService.handleTask(payload)]
+    F --> G[switch(payload.current_step)]
+
+    G --> G1[ASSIGNMENT_NEW_WORK\nconsole.log('New work assigned')] 
+    G --> G2[STATUS_UPDATE\nconsole.log('Status update received')]
+    G --> G3[ASSIGNMENT_REASSIGN\nconsole.log('Work reassigned')]
+    G --> G4[default\nconsole.log('Unhandled payload')]
+
+    subgraph AppBootstrap
+        H[NestFactory.create(AppModule)]
+        I[app.connectMicroservice(RMQ)]
+        J[app.startAllMicroservices()]
+        K[app.listen(3000)]
+    end
+
+    H --> I --> J --> K
+
+    B -. injects .-> L[TASK_BROKER ClientProxy]
+    L --> C
+
+    classDef rabbit fill:#f9d7a7,stroke:#b96c00,color:#000;
+    classDef app fill:#d7ebff,stroke:#235f9c,color:#000;
+    classDef service fill:#d9f7d9,stroke:#2f7d32,color:#000;
+
+    class C,D,E rabbit;
+    class H,I,J,K,B,F,G app;
+    class G1,G2,G3,G4 service;

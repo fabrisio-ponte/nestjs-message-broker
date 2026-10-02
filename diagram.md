@@ -1,3 +1,6 @@
+# RabbitMQ Event Flow
+
+```mermaid
 sequenceDiagram
     autonumber
     participant Client as HTTP Client
@@ -24,3 +27,10 @@ sequenceDiagram
     end
 
     Controller-->>Client: { success: true, queued: true }
+```
+
+This is the event-driven flow:
+- HTTP request enters the app
+- controller emits an event to RabbitMQ
+- RabbitMQ delivers the message to the consumer
+- the service decides what to do based on `current_step`
